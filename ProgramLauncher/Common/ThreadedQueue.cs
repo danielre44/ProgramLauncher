@@ -24,7 +24,7 @@ namespace ProgramLauncher.Common
 
         #region Constructors
 
-        public ThreadedQueue(string threadIdentifier = "")
+        public ThreadedQueue(string threadIdentifier)
         {
             this._queueLock = new object();
             this._startStopLock = new object();
@@ -238,11 +238,11 @@ namespace ProgramLauncher.Common
                 Logger.LogError("Thread is null!");
                 fieldsValid = false;
             }
-            else if (ThreadState.Running != this._thread.ThreadState)
-            {
-                Logger.LogError("Thread is not running!");
-                fieldsValid = false;
-            }
+            //else if (ThreadState.Running != this._thread.ThreadState)
+            //{
+            //    Logger.LogError("Thread is not running!");
+            //    fieldsValid = false;
+            //}
 
             if (null == this._callback)
             {

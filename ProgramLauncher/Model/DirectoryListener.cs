@@ -8,14 +8,16 @@ using System.Threading.Tasks;
 
 namespace ProgramLauncher.Model
 {
-    public class DirectoryListener : IStoppable
+    public class DirectoryListener
     {
         #region Fields
-        
+
+        // TODO: Write why only one
+        private readonly object _lock;
+
         private FileModel _fileModel;
         private FileSystemWatcher _fileSystemWatcher;
         private HashSet<string> _fileSet;
-        private readonly object _lock;
         
         #endregion
 
@@ -24,10 +26,11 @@ namespace ProgramLauncher.Model
         public DirectoryListener(FileModel fileModel, string absoluteDirectoryPath)
         {
             // Initialize class members
+            this._lock = new object();
+
             this._fileModel = fileModel;
             this._fileSystemWatcher = new FileSystemWatcher(absoluteDirectoryPath);
             this._fileSet = new HashSet<string>();
-            this._lock = new object();
             this.Stopped = false;
             
             // Add event handlers
@@ -75,6 +78,25 @@ namespace ProgramLauncher.Model
             private set;
         }
         
+        public string[] DiscoveredFiles
+        {
+            get
+            {
+                lock (this._lock)
+                {
+                    if (this.FieldsValid())
+                    {
+                        return this._fileSet.ToArray();
+                    }
+                    else
+                    {
+                        Logger.LogWarning("Fields not valid, returning empty string array.");
+                        return new string[0];
+                    }
+                }
+            }
+        }
+
         #endregion
 
 
@@ -101,6 +123,12 @@ namespace ProgramLauncher.Model
                         this._fileSystemWatcher.Created -= new FileSystemEventHandler(this.FileSystemWatcher_OnCreated);
                         this._fileSystemWatcher.Deleted -= new FileSystemEventHandler(this.FileSystemWatcher_OnDeleted);
                         this._fileSystemWatcher.Renamed -= new RenamedEventHandler(this.FileSystemWatcher_OnRenamed);
+
+                        // Remove files from model
+                        foreach (string addedFiles in this.DiscoveredFiles)
+                        {
+                            this._fileModel.RemoveFile(addedFiles);
+                        }
 
                         // Unset fields
                         this._fileSystemWatcher = null;
@@ -132,7 +160,7 @@ namespace ProgramLauncher.Model
         private void FileSystemWatcher_OnDeleted(object source, FileSystemEventArgs e)
         {
             Logger.LogTrace("File: " + e.FullPath + " " + e.ChangeType);
-            this.InternalAddFile(e.FullPath);
+            this.InternalRemoveFile(e.FullPath);
         }
 
         private void FileSystemWatcher_OnRenamed(object source, RenamedEventArgs e)
@@ -175,6 +203,7 @@ namespace ProgramLauncher.Model
                 if (this.FieldsValid())
                 {
                     this._fileModel.AddFile(absoluteFilePath);
+                    this._fileSet.Add(absoluteFilePath);
                 }
             }
         }
@@ -186,6 +215,15 @@ namespace ProgramLauncher.Model
                 if (this.FieldsValid())
                 {
                     this._fileModel.RemoveFile(absoluteFilePath);
+
+                    if (this._fileSet.Contains(absoluteFilePath))
+                    {
+                        this._fileSet.Remove(absoluteFilePath);
+                    }
+                    else
+                    {
+                        Logger.LogWarning("Attempted to remove a file path that doesnt exist!");
+                    }
                 }
             }
         }

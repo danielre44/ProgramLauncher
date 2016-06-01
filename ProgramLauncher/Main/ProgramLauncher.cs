@@ -10,35 +10,28 @@ namespace ProgramLauncher.Main
 {
     internal abstract class ProgramLauncher
     {
+        public static void FileAddedHandlerImpl(FileData fileData)
+        {
+            Logger.LogInfo("File Added: " + fileData.FileName + " Ext: " + fileData.FileExtension + " Path: " + fileData.AbsoluteFilePath);
+        }
 
         [STAThread]
         static void Main(string[] args)
         {
-            Console.WriteLine("Starting Logger");
+            Application app = new Application();
 
             Logger.Instance.Init();
 
-            //foreach (string s in System.IO.Directory.GetFiles("D:\\program_launcher_test"))
-            //{
-            //    Console.WriteLine("File: \"" + s + "\"");
-            //}
-
-            //DirectoryFileManager p = new DirectoryFileManager();
 
             FileModel model = new FileModel();
 
             model.ListenToDirectory("D:\\program_launcher_test");
 
-            //System.Threading.Thread.Sleep(1000);
-
-            //model.StopListeningToDirectory("D:\\program_launcher_test");
-
-            //System.Threading.Thread.Sleep(10000);
+            model.FileAdded += FileAddedHandlerImpl;
 
             /*
              * Run application until it's closed...
              */
-            Application app = new Application();
             app.Run(new TestWindow());
 
             // Shutdown FileModel.

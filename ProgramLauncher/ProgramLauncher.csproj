@@ -56,12 +56,14 @@
   <ItemGroup>
     <Compile Include="Common\ProcessThreadedQueueItem.cs" />
     <Compile Include="Common\ThreadedQueue.cs" />
+    <Compile Include="Model\FileRemovedHandler.cs" />
     <Compile Include="Model\FileModel.cs" />
     <Compile Include="Common\IStoppable.cs" />
     <Compile Include="Model\DirectoryListener.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Model\FileData.cs" />
     <Compile Include="Main\ProgramLauncher.cs" />
+    <Compile Include="Model\FileAddedHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

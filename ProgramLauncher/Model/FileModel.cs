@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using ProgramLauncher.Common;
+using System.Windows;
 
 namespace ProgramLauncher.Model
 {
@@ -62,6 +63,8 @@ namespace ProgramLauncher.Model
                         if (!fileModel._fileMap.ContainsKey(addedFile.AbsoluteFilePath))
                         {
                             fileModel._fileMap.Add(addedFile.AbsoluteFilePath, addedFile);
+
+                            fileModel.FireFileAddedEvent(addedFile);
                         }
                         else
                         {
@@ -107,7 +110,10 @@ namespace ProgramLauncher.Model
                 {
                     if (fileModel._fileMap.ContainsKey(this._absoluteFilePath))
                     {
+                        FileData removedFile = fileModel._fileMap[this._absoluteFilePath];
                         fileModel._fileMap.Remove(this._absoluteFilePath);
+
+                        fileModel.FireFileRemovedEvent(removedFile);
                     }
                     else
                     {
@@ -188,10 +194,13 @@ namespace ProgramLauncher.Model
                 {
                     if (fileModel._directoryListenerMap.ContainsKey(this._absoluteDirectoryPath))
                     {
-                        fileModel._directoryListenerMap[this._absoluteDirectoryPath].Stop();
-
-                        fileModel._directoryListenerMap.Remove(this._absoluteDirectoryPath);
-                        //GC.Collect();
+                        DirectoryListener directoryListener = fileModel._directoryListenerMap[this._absoluteDirectoryPath];
+                        /*
+                         * Stop the listener.
+                         */
+                        directoryListener.Stop();
+                        // Finish removing the directory from our internal map
+                        fileModel._directoryListenerMap.Remove(this._absoluteDirectoryPath);                        
                     }
                     else
                     {
@@ -208,13 +217,7 @@ namespace ProgramLauncher.Model
 
         #region Fields
 
-        /*
-            * TODO:
-            *   - Replace with faster collection...
-            */
-        private readonly object _processQueueLock;
-        private readonly Queue<IProcessableEvent> _processQueue;
-        private bool _processing;
+        private readonly ThreadedQueue<IProcessableEvent> _processingQueue;
 
         private readonly Dictionary<string, FileData> _fileMap;
         private readonly object _fileMapLock;
@@ -223,10 +226,7 @@ namespace ProgramLauncher.Model
         private readonly Dictionary<string, DirectoryListener> _directoryListenerMap;
         private readonly object _directoryListenerMapLock;
 
-        private readonly Thread _processingThread;
         private readonly object _stopLock;
-
-        //private readonly Queue<>
 
         #endregion
 
@@ -234,21 +234,26 @@ namespace ProgramLauncher.Model
 
         public FileModel()
         {
-            this._processQueueLock = new object();
+            this._processingQueue = new ThreadedQueue<IProcessableEvent>("FileModel Processor");
 
-            //this._processQueue
-            this._processQueue = new Queue<IProcessableEvent>();
-            this._processing = false;
             this._fileMap = new Dictionary<string, FileData>();
             this._fileMapLock = new object();
+
             this._directoryListenerMap = new Dictionary<string, DirectoryListener>();
             this._directoryListenerMapLock = new object();
-            this._processingThread = new Thread(this.ProcessThreadEntryPoint);
+
             this._stopLock = new object();
 
-            this._processingThread.Name = "FileModel - Processing Thread";
-            this._processingThread.Start();
+
+            this._processingQueue.Start(this.Process);
         }
+
+        #endregion
+
+        #region Events
+
+        public event FileAddedHandler FileAdded;
+        public event FileRemovedHandler FileRemoved;
 
         #endregion
 
@@ -256,10 +261,8 @@ namespace ProgramLauncher.Model
 
         public bool Stopped
         {
-            get
-            {
-                return (false == this._processing);
-            }
+            get;
+            private set;
         }
 
         public FileData[] AllFiles
@@ -277,32 +280,29 @@ namespace ProgramLauncher.Model
         #endregion
 
         #region Public Methods
-        
+
         // TODO
         public void Stop()
         {
             if (false == this.Stopped)
             {
-                this._processing = false;
-
-                // TODO
-                lock (this._processQueueLock)
+                lock (this._stopLock)
                 {
-                    Monitor.PulseAll(this._processQueueLock);
+                    if (false == this.Stopped)
+                    {
+                        this._processingQueue.Stop();
+
+
+                        this._fileMap.Clear();
+
+                        foreach (DirectoryListener directoryListener in _directoryListenerMap.Values)
+                        {
+                            directoryListener.Stop();
+                        }
+                        this._directoryListenerMap.Clear();
+                        
+                    }
                 }
-
-                
-                this._processQueue.Clear();
-                this._fileMap.Clear();
-
-                foreach (DirectoryListener directoryListener in _directoryListenerMap.Values)
-                {
-                    directoryListener.Stop();
-                }
-                this._directoryListenerMap.Clear();
-
-                // TODO
-                this._processingThread.Join();
             }
         }
         
@@ -329,53 +329,33 @@ namespace ProgramLauncher.Model
         #endregion
 
         #region Private Methods
-        
-        private void InternalAddProcessableEvent(IProcessableEvent processableEvent)
+
+        private void Process(IProcessableEvent processableEvent)
         {
-            lock (this._processQueueLock)
-            {
-                this._processQueue.Enqueue(processableEvent);
-                Monitor.Pulse(this._processQueueLock);
-            }
+            processableEvent.Process(this);
         }
 
-        private void ProcessThreadEntryPoint()
+        private void InternalAddProcessableEvent(IProcessableEvent processableEvent)
         {
-            Logger.LogTrace("Entered");
-            this._processing = true;
+            this._processingQueue.Enqueue(processableEvent);
+        }      
 
-            while (this._processing)
-            {
-                var localQueue = new Queue<IProcessableEvent>();
-
-                // Get all items from processing queue
-                lock (this._processQueueLock)
+        private void FireFileAddedEvent(FileData fileData)
+        {
+            Application.Current.Dispatcher.BeginInvoke(new Action(
+                () =>
                 {
-                    // Wait until we have new data
-                    if (this._processQueue.Count <= 0 && this._processing)
-                    {
-                        Monitor.Wait(this._processQueueLock);
-                    }
+                    this.FileAdded(fileData);
+                }));
+        }
 
-                    // In case we're signaled to shutdown, make sure we should process the queue
-                    while (this._processing && (this._processQueue.Count > 0))
-                    {
-                        localQueue.Enqueue(this._processQueue.Dequeue());
-                    }
-                }
-
-                // Process items
-                Logger.LogTrace("Starting to processes, Queue Size: " + localQueue.Count);
-
-                while (this._processing && (localQueue.Count > 0))
+        private void FireFileRemovedEvent(FileData fileData)
+        {
+            Application.Current.Dispatcher.BeginInvoke(new Action(
+                () =>
                 {
-                    IProcessableEvent processableEvent = localQueue.Dequeue();
-
-                    processableEvent.Process(this);                    
-                }
-            }
-
-            Logger.LogTrace("Exiting");
+                    this.FileRemoved(fileData);
+                } ));
         }
 
         #endregion
