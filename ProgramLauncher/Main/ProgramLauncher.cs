@@ -1,4 +1,6 @@
-﻿using ProgramLauncher.Model;
+﻿using ProgramLauncher.Common;
+using ProgramLauncher.Model;
+using ProgramLauncher.View;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +34,8 @@ namespace ProgramLauncher.Main
             /*
              * Run application until it's closed...
              */
-            app.Run(new TestWindow());
+            //app.Run(new TestWindow());
+            app.Run(new BasicFileWindow(new BasicFileViewModel(model)));
 
             // Shutdown FileModel.
             Logger.LogInfo("Start - Shutting down FileModel.");

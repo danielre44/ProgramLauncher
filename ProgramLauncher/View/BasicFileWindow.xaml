@@ -1,0 +1,55 @@
+﻿<Window x:Class="ProgramLauncher.View.BasicFileWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:model="clr-namespace:ProgramLauncher.Model"
+        xmlns:local="clr-namespace:ProgramLauncher.View"
+        mc:Ignorable="d"
+        Title="BasicFileWindow" Height="300" Width="300"
+        Name="This">
+    <StackPanel Grid.IsSharedSizeScope="True">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition SharedSizeGroup="C0"/>
+                <ColumnDefinition SharedSizeGroup="C1"/>
+                <ColumnDefinition SharedSizeGroup="C2"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Content="Name" />
+            <Label Grid.Row="0" Grid.Column="1" Content="Extension" />
+            <Label Grid.Row="0" Grid.Column="2" Content="Path" />
+
+        </Grid>
+        <ListBox Grid.Row="1" ItemsSource="{Binding ElementName=This, Path=ViewModel.FileDataList}">
+            <ListBox.Resources>
+                <DataTemplate DataType="{x:Type model:FileData}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="C0"/>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="C1"/>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="C2"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <Label Grid.Row="0" Grid.Column="0" Content="{Binding Path=FileName}" />
+                        <Label Grid.Row="0" Grid.Column="1" Content="{Binding Path=FileExtension}" />
+                        <Label Grid.Row="0" Grid.Column="2" Content="{Binding Path=AbsoluteFilePath}" />
+
+                    </Grid>
+                </DataTemplate>
+            </ListBox.Resources>
+        </ListBox>
+    </StackPanel>
+</Window>
