@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
+using System.Windows.Data;
 
 namespace ProgramLauncher.View
 {
@@ -16,11 +17,13 @@ namespace ProgramLauncher.View
 
         #region Fields
 
-        private readonly ObservableCollection<FileData> _fileDataList;
-        private readonly ReadOnlyObservableCollection<FileData> _readOnlyFileDataList;
+        private readonly ObservableCollection<FileData> _FIXED_fileDataList;
 
-        private readonly ObservableCollection<FileData> _filteredFileDataList;
-        private readonly ReadOnlyObservableCollection<FileData> _readOnlyfilteredFileDataList;
+        private readonly ObservableCollection<FileData> _fileDataList;
+
+        private ICollectionView _fileDataListView;
+
+        //private CollectionV
 
         private string _inputText;
         
@@ -30,11 +33,11 @@ namespace ProgramLauncher.View
 
         public BasicFileViewModel(FileModel fileModel)
         {
+            this._FIXED_fileDataList = new ObservableCollection<FileData>();
             this._fileDataList = new ObservableCollection<FileData>();
-            this._readOnlyFileDataList = new ReadOnlyObservableCollection<FileData>(this._fileDataList);
+            this._fileDataListView = CollectionViewSource.GetDefaultView(this._fileDataList);
 
-            this._filteredFileDataList = new ObservableCollection<FileData>(this._fileDataList.ToList());
-            this._readOnlyfilteredFileDataList = new ReadOnlyObservableCollection<FileData>(this._filteredFileDataList);
+            this._fileDataListView.Filter = this.TestFilter;
 
             this._inputText = string.Empty;
 
@@ -47,19 +50,19 @@ namespace ProgramLauncher.View
 
         #region Properties
 
-        public ReadOnlyObservableCollection<FileData> FileDataList
+        public ObservableCollection<FileData> FileDataList
         {
             get
             {
-                return this._readOnlyFileDataList;
+                return this._FIXED_fileDataList;
             }
         }
 
-        public ReadOnlyObservableCollection<FileData> FilteredFileDataList
+        public ICollectionView FilteredFileDataList
         {
             get
             {
-                return this._readOnlyfilteredFileDataList;
+                return this._fileDataListView;
             }
         }
 
@@ -87,12 +90,9 @@ namespace ProgramLauncher.View
 
             if (property.Equals(nameof(this.InputText)))
             {
-                this.ApplyFilter();
+                this._fileDataListView.Refresh();
             }
-            else if (property.Equals("Test"))
-            {
-                this.ApplyFilter();
-            }
+
 
 
             //if (property.Equals("InputText"))
@@ -102,18 +102,18 @@ namespace ProgramLauncher.View
 
         #region Private Methods
 
-        private void ApplyFilter()
+        private bool TestFilter(object obj)
         {
-            this._filteredFileDataList.Clear();
-            
-            if (string.IsNullOrEmpty(this.InputText))
+            FileData fileData = obj as FileData;
+
+            if (null != fileData)
             {
-                this._fileDataList.FirstOrDefault(x => { this._filteredFileDataList.Add(x); return false; });
+                return fileData.FileName.Contains(this.InputText);
             }
-            else
-            { 
-                this._fileDataList.Where(x => x.FileName.Contains(this.InputText)).FirstOrDefault(x => { this._filteredFileDataList.Add(x); return false; });
-            }
+
+
+            // True displays, false hides
+            return true;
         }
 
         /*
@@ -122,18 +122,14 @@ namespace ProgramLauncher.View
 
         private void FileAddedHandler(FileData fileData)
         {
+            this._FIXED_fileDataList.Add(fileData);
             this._fileDataList.Add(fileData);
-            this._filteredFileDataList.Add(fileData);
-
-            this.HandleInternalPropertyChanged("Test");
         }
 
         private void FileRemovedHandler(FileData fileData)
         {
+            this._FIXED_fileDataList.Remove(fileData);
             this._fileDataList.Remove(fileData);
-            this._filteredFileDataList.Remove(fileData);
-            
-            this.HandleInternalPropertyChanged("Test");
         }
 
         #endregion
