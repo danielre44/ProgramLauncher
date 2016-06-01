@@ -54,6 +54,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\BaseViewModel.cs" />
     <Compile Include="Common\ProcessThreadedQueueItem.cs" />
     <Compile Include="Common\ThreadedQueue.cs" />
     <Compile Include="Model\FileRemovedHandler.cs" />
