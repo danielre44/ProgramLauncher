@@ -13,6 +13,7 @@ namespace ProgramLauncher.Model
     /// </summary>
     public class FileData
     {
+        
         #region Fields
         
         private readonly string _fileName;

@@ -38,7 +38,7 @@ namespace ProgramLauncher.Common
 
         #region Private Methods
 
-        private void OnPropertyChanged(string property)
+        protected void OnPropertyChanged(string property)
         {
             this.PropertyChanged(this, new PropertyChangedEventArgs(property));
             this.HandleInternalPropertyChanged(property);

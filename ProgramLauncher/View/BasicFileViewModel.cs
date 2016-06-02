@@ -19,7 +19,7 @@ namespace ProgramLauncher.View
 
         private readonly ObservableCollection<FileData> _FIXED_fileDataList;
 
-        private readonly ObservableCollection<FileData> _fileDataList;
+        private readonly ObservableCollection<FileDataView> _fileDataList;
 
         private ICollectionView _fileDataListView;
 
@@ -34,10 +34,18 @@ namespace ProgramLauncher.View
         public BasicFileViewModel(FileModel fileModel)
         {
             this._FIXED_fileDataList = new ObservableCollection<FileData>();
-            this._fileDataList = new ObservableCollection<FileData>();
+            this._fileDataList = new ObservableCollection<FileDataView>();
             this._fileDataListView = CollectionViewSource.GetDefaultView(this._fileDataList);
 
-            this._fileDataListView.Filter = this.TestFilter;
+            //this._fileDataListView.Filter = this.TestFilter;
+            //this._fileDataListView.SortDescriptions.
+
+            ListCollectionView l = (ListCollectionView)this._fileDataListView;
+            //l.CustomSort = new TestStringComparer();
+            l.IsLiveSorting = true;
+
+            l.SortDescriptions.Add(new SortDescription("val", ListSortDirection.Ascending));
+            
 
             this._inputText = string.Empty;
 
@@ -66,6 +74,14 @@ namespace ProgramLauncher.View
             }
         }
 
+        //public ObservableCollection<FileDataView> FilteredFileDataList
+        //{
+        //    get
+        //    {
+        //        return this._fileDataList;
+        //    }
+        //}
+
         public string InputText
         {
             get
@@ -90,7 +106,12 @@ namespace ProgramLauncher.View
 
             if (property.Equals(nameof(this.InputText)))
             {
-                this._fileDataListView.Refresh();
+                foreach (FileDataView data in this.FilteredFileDataList)
+                {
+                    data.val = OnlineCode.Levenshtein.iLD(data.FileDataProperty.FileName, this.InputText);
+                }
+
+                //this._fileDataListView.Refresh();
             }
 
 
@@ -102,19 +123,19 @@ namespace ProgramLauncher.View
 
         #region Private Methods
 
-        private bool TestFilter(object obj)
-        {
-            FileData fileData = obj as FileData;
+        //private bool TestFilter(object obj)
+        //{
+        //    FileData fileData = obj as FileData;
 
-            if (null != fileData)
-            {
-                return fileData.FileName.Contains(this.InputText);
-            }
+        //    if (null != fileData)
+        //    {
+        //        return fileData.FileName.Contains(this.InputText);
+        //    }
 
 
-            // True displays, false hides
-            return true;
-        }
+        //    // True displays, false hides
+        //    return true;
+        //}
 
         /*
          * TODO: We should be on the GUI thread.. verify?
@@ -123,13 +144,13 @@ namespace ProgramLauncher.View
         private void FileAddedHandler(FileData fileData)
         {
             this._FIXED_fileDataList.Add(fileData);
-            this._fileDataList.Add(fileData);
+            this._fileDataList.Add(new FileDataView(fileData));
         }
 
         private void FileRemovedHandler(FileData fileData)
         {
             this._FIXED_fileDataList.Remove(fileData);
-            this._fileDataList.Remove(fileData);
+            //this._fileDataList.Remove(fileData);
         }
 
         #endregion
