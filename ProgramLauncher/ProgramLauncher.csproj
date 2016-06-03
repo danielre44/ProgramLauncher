@@ -55,6 +55,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\BaseViewModel.cs" />
+    <Compile Include="Common\Configuration.cs" />
+    <Compile Include="Common\GetMethodName.cs" />
     <Compile Include="Common\ProcessThreadedQueueItem.cs" />
     <Compile Include="Common\TestStringComparer.cs" />
     <Compile Include="Common\ThreadedQueue.cs" />
@@ -86,7 +88,7 @@
     <Compile Include="View\BasicFileWindow.xaml.cs">
       <DependentUpon>BasicFileWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\FileDataView.cs" />
+    <Compile Include="View\FileViewData.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -112,6 +114,9 @@
       <Project>{d8a21fba-cc92-4c5d-ab25-674814e280fb}</Project>
       <Name>OnlineCode</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="StringCompare\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

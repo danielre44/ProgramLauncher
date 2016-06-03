@@ -49,56 +49,17 @@
             <Label Grid.Row="0" Grid.Column="2" Content="Value" />
 
         </Grid>
-        <ListBox ItemsSource="{Binding ElementName=This, Path=ViewModel.FileDataList}">
-            <ListBox.Resources>
-                <DataTemplate DataType="{x:Type model:FileData}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
+        <DataGrid ItemsSource="{Binding ElementName=This, Path=ViewModel.FileDataList}" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding FileName}" />
+                <DataGridTextColumn Header="Extension" Binding="{Binding FileExtension}" />
+                <DataGridTextColumn Header="Path" Binding="{Binding AbsoluteFilePath}" />
+                <DataGridTextColumn Header="String Compare Value" Binding="{Binding StringCompareValue}" />
 
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="C0"/>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="C1"/>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="C2"/>
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-
-                        <Label Grid.Row="0" Grid.Column="0" Content="{Binding Path=FileName}" />
-                        <Label Grid.Row="0" Grid.Column="1" Content="{Binding Path=FileExtension}" />
-                        <Label Grid.Row="0" Grid.Column="2" Content="{Binding Path=AbsoluteFilePath}" />
-
-                    </Grid>
-                </DataTemplate>
-            </ListBox.Resources>
-        </ListBox>
-
-
-        <ListBox ItemsSource="{Binding ElementName=This, Path=ViewModel.FilteredFileDataList}">
-            <ListBox.Resources>
-                <DataTemplate DataType="{x:Type local:FileDataView}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="C0"/>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="C1"/>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="C2"/>
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-
-                        <Label Grid.Row="0" Grid.Column="0" Content="{Binding Path=FileDataProperty.FileName}" />
-                        <Label Grid.Row="0" Grid.Column="1" Content="{Binding Path=FileDataProperty.FileExtension}" />
-                        <Label Grid.Row="0" Grid.Column="2" Content="{Binding Path=val}" />
-
-                    </Grid>
-                </DataTemplate>
-            </ListBox.Resources>
-        </ListBox>
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        
 
     </StackPanel>
 </Window>
