@@ -18,7 +18,7 @@ namespace ProgramLauncher.Common
         private Thread _thread;
         private bool _running;
         private Queue<T> _queue;
-        private ProcessThreadedQueueItem<T> _callback;
+        private Action<T> _callback;
 
         #endregion
 
@@ -56,7 +56,8 @@ namespace ProgramLauncher.Common
         /// Starts the Queue Thread.
         /// </summary>
         /// <param name="callback"></param>
-        public void Start(ProcessThreadedQueueItem<T> callback)
+        //public void Start(ProcessThreadedQueueItem<T> callback)
+        public void Start(Action<T> callback)
         {
             // TODO
             if (callback == null)

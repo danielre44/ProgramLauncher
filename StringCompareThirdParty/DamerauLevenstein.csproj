@@ -7,7 +7,7 @@
     <ProjectGuid>{75C1A6A9-16AB-49CD-BE17-ED8E2AE7A804}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>StringCompareThirdParty</RootNamespace>
+    <RootNamespace>ThirdParty.DamerauLevenstein</RootNamespace>
     <AssemblyName>StringCompareThirdParty</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -41,11 +41,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ThirdParty\DamerauLevensteinMetric.cs" />
+    <Compile Include="DamerauLevensteinMetric.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="src\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

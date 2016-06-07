@@ -1,0 +1,171 @@
+﻿<Window x:Class="ProgramLauncher.View.ConfigurationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ProgramLauncher.View"
+        xmlns:data="clr-namespace:ProgramLauncher.ViewModel.Data"
+        mc:Ignorable="d"
+        Title="ConfigurationWindow" Height="300" Width="300"
+        Name="This">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+  
+        
+        <!-- 
+            Directories 
+        -->
+        <GroupBox
+            Grid.Row="0"
+            Grid.Column="0"
+            Header="Directories"
+            >
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <DataGrid
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    ItemsSource="{Binding ElementName=This, Path=ViewModel.Directories}" 
+                    AutoGenerateColumns="False"
+                    SelectedItem="{Binding ElementName=This, Path=ViewModel.SelectedDirectory, Mode=TwoWay}"
+                    >
+                    <DataGrid.Columns>
+                        <DataGridCheckBoxColumn
+                            Width="Auto"
+                            IsReadOnly="True"
+                            Header="Modified"
+                            Binding="{Binding Path=Modified, Mode=OneWay}"
+                            />
+                        <DataGridTemplateColumn Width="*" >
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="DirectoryViewData">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox
+                                            Grid.Row="0"
+                                            Grid.Column="0"
+                                            Text="{Binding AbsolutePath, UpdateSourceTrigger=PropertyChanged}"
+                                            Foreground="{Binding TextColor}"
+                                            />
+                                    </Grid>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Grid 
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Row="0" Grid.Column="0" Content="Add Row" />
+            
+                </Grid>
+            </Grid>
+        </GroupBox>
+
+
+
+        <!-- 
+            Grid for Add/Remove buttons 
+        -->
+        <Grid Grid.Row="2" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Add Button -->
+            <Button 
+                Grid.Row="0" 
+                Grid.Column="2" 
+                Content="Add" 
+                Command="{Binding ElementName=This, Path=ViewModel.CommandHandler}"
+                CommandParameter="{x:Static data:ConfigurationWindowCommand.AddDirectory}"
+                />
+            <!-- Remove Button -->
+            <Button 
+                Grid.Row="0" 
+                Grid.Column="4" 
+                Content="Remove" 
+                Command="{Binding ElementName=This, Path=ViewModel.CommandHandler}"
+                CommandParameter="{x:Static data:ConfigurationWindowCommand.RemoveDirectory}"
+                />
+        </Grid>
+
+        <!-- 
+            Grid for Ok/Apply/Cancel
+        -->
+        <Grid Grid.Row="4" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- OK Button -->
+            <Button 
+                Grid.Row="0" 
+                Grid.Column="0"
+                Content="OK"
+                Command="{Binding ElementName=This, Path=OkCancelApplyCommandHandler}"
+                CommandParameter="{x:Static data:OkCancelApplyWindowCommand.Ok}"
+                />
+            <!-- Cancel -->
+            <Button
+                Grid.Row="0"
+                Grid.Column="1"
+                Content="Cancel"
+                Command="{Binding ElementName=This, Path=OkCancelApplyCommandHandler}"
+                CommandParameter="{x:Static data:OkCancelApplyWindowCommand.Cancel}"
+                />
+            <!-- Apply Button -->
+            <Button 
+                Grid.Row="0" 
+                Grid.Column="2" 
+                Content="Apply" 
+                Command="{Binding ElementName=This, Path=OkCancelApplyCommandHandler}"
+                CommandParameter="{x:Static data:OkCancelApplyWindowCommand.Apply}"
+                />
+        </Grid>
+        
+    </Grid>
+</Window>

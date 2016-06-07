@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ProgramLauncher.Common
 {
-    public abstract class BaseViewModel : INotifyPropertyChanged
+    public abstract class BaseNotifyPropertyChanged : INotifyPropertyChanged
     {
         #region Events
 
@@ -27,18 +27,34 @@ namespace ProgramLauncher.Common
         protected void SetProperty<T>(T newValue, ref T currentValue, [CallerMemberName] string callerName = "")
             where T : class
         {
-            if (false == currentValue.Equals(newValue))
+            if (null != currentValue)
+            {
+                if (false == currentValue.Equals(newValue))
+                {
+                    currentValue = newValue;
+                    this.OnPropertyChanged(callerName);
+                }
+            }
+            else
+            {
+                if (null != newValue)
+                {
+                    currentValue = newValue;
+                    this.OnPropertyChanged(callerName);
+                }
+            }
+        }
+
+        protected void SetProperty(bool newValue, ref bool currentValue, [CallerMemberName] string callerName = "")
+        {
+            if (newValue != currentValue)
             {
                 currentValue = newValue;
                 this.OnPropertyChanged(callerName);
             }
         }
 
-        #endregion
-
-        #region Private Methods
-
-        protected void OnPropertyChanged(string property)
+        protected virtual void OnPropertyChanged(string property)
         {
             this.PropertyChanged(this, new PropertyChangedEventArgs(property));
             this.HandleInternalPropertyChanged(property);

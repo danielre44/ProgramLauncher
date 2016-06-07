@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProgramLauncher.Model
+namespace ProgramLauncher.Model.FileSystem
 {
     public class DirectoryListener
     {
@@ -15,7 +15,7 @@ namespace ProgramLauncher.Model
         // TODO: Write why only one
         private readonly object _lock;
 
-        private FileModel _fileModel;
+        private FileSystemModel _fileModel;
         private FileSystemWatcher _fileSystemWatcher;
         private HashSet<string> _fileSet;
         
@@ -23,7 +23,7 @@ namespace ProgramLauncher.Model
 
         #region Constructors
 
-        public DirectoryListener(FileModel fileModel, string absoluteDirectoryPath)
+        public DirectoryListener(FileSystemModel fileModel, string absoluteDirectoryPath)
         {
             // Initialize class members
             this._lock = new object();
@@ -42,6 +42,7 @@ namespace ProgramLauncher.Model
             foreach (string existingFileAbsolutePath in System.IO.Directory.GetFiles(absoluteDirectoryPath))
             {
                 this._fileModel.AddFile(existingFileAbsolutePath);
+                this._fileSet.Add(existingFileAbsolutePath);
             }
 
             // Start listening for changes
@@ -51,6 +52,7 @@ namespace ProgramLauncher.Model
         }
 
         #endregion
+
 
         #region Public Properties
 
@@ -125,7 +127,7 @@ namespace ProgramLauncher.Model
                         this._fileSystemWatcher.Renamed -= new RenamedEventHandler(this.FileSystemWatcher_OnRenamed);
 
                         // Remove files from model
-                        foreach (string addedFiles in this.DiscoveredFiles)
+                        foreach (string addedFiles in this._fileSet)
                         {
                             this._fileModel.RemoveFile(addedFiles);
                         }

@@ -7,9 +7,9 @@ using System.Threading;
 using ProgramLauncher.Common;
 using System.Windows;
 
-namespace ProgramLauncher.Model
+namespace ProgramLauncher.Model.FileSystem
 {
-    public class FileModel : IStoppable
+    public class FileSystemModel : IStoppable
     {
 
         #region Types
@@ -25,7 +25,7 @@ namespace ProgramLauncher.Model
             /// Process implementation for the Event.
             /// </summary>
             /// <param name="fileModel">Access to the FileModel class.</param>
-            void Process(FileModel fileModel);
+            void Process(FileSystemModel fileModel);
 
             #endregion
         }
@@ -52,7 +52,7 @@ namespace ProgramLauncher.Model
 
             #region Public Methods 
 
-            public void Process(FileModel fileModel)
+            public void Process(FileSystemModel fileModel)
             {
                 FileData addedFile = FileData.TryCreateFromAbsolutePath(this._absoluteFilePath);
 
@@ -104,7 +104,7 @@ namespace ProgramLauncher.Model
 
             #region Public Methods 
 
-            public void Process(FileModel fileModel)
+            public void Process(FileSystemModel fileModel)
             {
                 lock (fileModel._fileMapLock)
                 {
@@ -141,20 +141,22 @@ namespace ProgramLauncher.Model
 
             public AddDirectoryListenerEvent(string absoluteDirectoryPath)
             {
-                this._absoluteDirectoryPath = absoluteDirectoryPath;
+                this._absoluteDirectoryPath = DirectoryStringFormatter.Format(absoluteDirectoryPath);
             }
 
             #endregion
 
             #region Public Methods 
 
-            public void Process(FileModel fileModel)
+            public void Process(FileSystemModel fileModel)
             {
                 lock (fileModel._directoryListenerMapLock)
                 {
                     if (!fileModel._directoryListenerMap.ContainsKey(this._absoluteDirectoryPath))
                     {
                         fileModel._directoryListenerMap.Add(this._absoluteDirectoryPath, new DirectoryListener(fileModel, this._absoluteDirectoryPath));
+
+                        fileModel.FireDirectoryAddedEvent(this._absoluteDirectoryPath);
                     }
                     else
                     {
@@ -181,14 +183,14 @@ namespace ProgramLauncher.Model
 
             public RemoveDirectoryListenerEvent(string absoluteDirectoryPath)
             {
-                this._absoluteDirectoryPath = absoluteDirectoryPath;
+                this._absoluteDirectoryPath = DirectoryStringFormatter.Format(absoluteDirectoryPath);
             }
 
             #endregion
 
             #region Public Methods 
 
-            public void Process(FileModel fileModel)
+            public void Process(FileSystemModel fileModel)
             {
                 lock (fileModel._directoryListenerMapLock)
                 {
@@ -200,7 +202,9 @@ namespace ProgramLauncher.Model
                          */
                         directoryListener.Stop();
                         // Finish removing the directory from our internal map
-                        fileModel._directoryListenerMap.Remove(this._absoluteDirectoryPath);                        
+                        fileModel._directoryListenerMap.Remove(this._absoluteDirectoryPath);
+
+                        fileModel.FireDirectoryRemovedEvent(this._absoluteDirectoryPath);
                     }
                     else
                     {
@@ -232,7 +236,7 @@ namespace ProgramLauncher.Model
 
         #region Constructors
 
-        public FileModel()
+        public FileSystemModel()
         {
             this._processingQueue = new ThreadedQueue<IProcessableEvent>("FileModel Processor");
 
@@ -252,8 +256,13 @@ namespace ProgramLauncher.Model
 
         #region Events
 
-        public event FileAddedHandler FileAdded;
-        public event FileRemovedHandler FileRemoved;
+        /*
+         * TODO: On GUI thread...
+         */
+        public event Action<FileData> FileAdded;
+        public event Action<FileData> FileRemoved;
+        public event Action<string> DirectoryAdded;
+        public event Action<string> DirectoryRemoved;
 
         #endregion
 
@@ -272,6 +281,17 @@ namespace ProgramLauncher.Model
                 lock (this._fileMapLock)
                 {
                     return this._fileMap.Values.ToArray();
+                }
+            }
+        }
+
+        public string[] AllDirectories
+        {
+            get
+            {
+                lock (this._directoryListenerMapLock)
+                {
+                    return this._directoryListenerMap.Keys.ToArray();
                 }
             }
         }
@@ -308,12 +328,23 @@ namespace ProgramLauncher.Model
         
         public void ListenToDirectory(string absoluteDirectoryPath)
         {
-            this.InternalAddProcessableEvent(new AddDirectoryListenerEvent(absoluteDirectoryPath));
+            /*
+             * Note:
+             *  - ToLower is called because windows is not case sensitive, 
+             *    and we do not want duplicates..
+             */
+            this.InternalAddProcessableEvent(new AddDirectoryListenerEvent(absoluteDirectoryPath.ToLower()));
         }
 
         public void StopListeningToDirectory(string absoluteDirectoryPath)
         {
-            this.InternalAddProcessableEvent(new RemoveDirectoryListenerEvent(absoluteDirectoryPath));
+            /*
+             * Note:
+             *  - ToLower is called because windows is not case sensitive, 
+             *    and we want to make sure we remove the specified
+             *    directory.
+             */
+            this.InternalAddProcessableEvent(new RemoveDirectoryListenerEvent(absoluteDirectoryPath.ToLower()));
         }
 
         public void AddFile(string filePath)
@@ -345,7 +376,10 @@ namespace ProgramLauncher.Model
             Application.Current.Dispatcher.BeginInvoke(new Action(
                 () =>
                 {
-                    this.FileAdded(fileData);
+                    if (this.FileAdded != null)
+                    {
+                        this.FileAdded(fileData);
+                    }
                 }));
         }
 
@@ -354,8 +388,35 @@ namespace ProgramLauncher.Model
             Application.Current.Dispatcher.BeginInvoke(new Action(
                 () =>
                 {
-                    this.FileRemoved(fileData);
+                    if (this.FileRemoved != null)
+                    {
+                        this.FileRemoved(fileData);
+                    }
                 } ));
+        }
+
+        private void FireDirectoryAddedEvent(string directory)
+        {
+            Application.Current.Dispatcher.BeginInvoke(new Action(
+                () =>
+                {
+                    if (this.DirectoryAdded != null)
+                    {
+                        this.DirectoryAdded(directory);
+                    }
+                }));
+        }
+
+        private void FireDirectoryRemovedEvent(string directory)
+        {
+            Application.Current.Dispatcher.BeginInvoke(new Action(
+                () =>
+                {
+                    if (this.DirectoryRemoved != null)
+                    {
+                        this.DirectoryRemoved(directory);
+                    }
+                }));
         }
 
         #endregion

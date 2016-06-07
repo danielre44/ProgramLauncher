@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProgramLauncher.Model
+namespace ProgramLauncher.Model.FileSystem
 {
     /// <summary>
     /// A class containing File Data.

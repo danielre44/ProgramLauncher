@@ -9,10 +9,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using System.Windows.Data;
+using ProgramLauncher.Model.FileSystem;
+using ProgramLauncher.ViewModel.Data;
 
-namespace ProgramLauncher.View
+namespace ProgramLauncher.ViewModel
 {
-    public class BasicFileViewModel : BaseViewModel
+    public class BasicFileViewModel : BaseNotifyPropertyChanged
     {
 
         #region Fields
@@ -26,14 +28,19 @@ namespace ProgramLauncher.View
 
         #region Constructors
 
-        public BasicFileViewModel(FileModel fileModel)
+        public BasicFileViewModel(FileSystemModel fileModel)
         {
             this._fileDataViewMap = new Dictionary<FileData, FileViewData>();
             this._fileDataList = new ObservableCollection<FileViewData>();
             this._inputText = string.Empty;
-
+            
             fileModel.FileAdded += this.FileAddedHandler;
             fileModel.FileRemoved += this.FileRemovedHandler;
+
+            foreach (FileData data in fileModel.AllFiles)
+            {
+                this.FileAddedHandler(data);
+            }
         }
 
         #endregion

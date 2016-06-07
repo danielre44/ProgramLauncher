@@ -1,0 +1,5 @@
+D:\Documents\Visual Studio 2015\Projects\ProgramLauncher\StringCompareThirdParty\bin\Debug\StringCompareThirdParty.dll
+D:\Documents\Visual Studio 2015\Projects\ProgramLauncher\StringCompareThirdParty\bin\Debug\StringCompareThirdParty.pdb
+D:\Documents\Visual Studio 2015\Projects\ProgramLauncher\StringCompareThirdParty\obj\Debug\DamerauLevenstein.csprojResolveAssemblyReference.cache
+D:\Documents\Visual Studio 2015\Projects\ProgramLauncher\StringCompareThirdParty\obj\Debug\StringCompareThirdParty.dll
+D:\Documents\Visual Studio 2015\Projects\ProgramLauncher\StringCompareThirdParty\obj\Debug\StringCompareThirdParty.pdb

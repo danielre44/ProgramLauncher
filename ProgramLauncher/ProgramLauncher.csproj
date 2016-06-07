@@ -35,11 +35,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>ProgramLauncher.Main.ProgramLauncher</StartupObject>
+    <StartupObject>ProgramLauncher.EntryPoint</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -54,20 +56,18 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\BaseViewModel.cs" />
-    <Compile Include="Common\Configuration.cs" />
+    <Compile Include="Common\DirectoryStringFormatter.cs" />
+    <Compile Include="Common\EnumCommandHandler.cs" />
+    <Compile Include="Common\BaseNotifyPropertyChanged.cs" />
     <Compile Include="Common\GetMethodName.cs" />
-    <Compile Include="Common\ProcessThreadedQueueItem.cs" />
-    <Compile Include="Common\TestStringComparer.cs" />
     <Compile Include="Common\ThreadedQueue.cs" />
-    <Compile Include="Model\FileRemovedHandler.cs" />
-    <Compile Include="Model\FileModel.cs" />
+    <Compile Include="Model\FileSystem\FileSystemModel.cs" />
     <Compile Include="Common\IStoppable.cs" />
-    <Compile Include="Model\DirectoryListener.cs" />
+    <Compile Include="Model\FileSystem\DirectoryListener.cs" />
     <Compile Include="Common\Logger.cs" />
-    <Compile Include="Model\FileData.cs" />
-    <Compile Include="Main\ProgramLauncher.cs" />
-    <Compile Include="Model\FileAddedHandler.cs" />
+    <Compile Include="Model\FileSystem\FileData.cs" />
+    <Compile Include="Model\ProgramLauncherModel.cs" />
+    <Compile Include="EntryPoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -81,14 +81,21 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="TestWindow.xaml.cs">
-      <DependentUpon>TestWindow.xaml</DependentUpon>
+    <Compile Include="ViewModel\ConfigurationWindowViewModel.cs" />
+    <Compile Include="ViewModel\Data\ConfigurationWindowCommand.cs" />
+    <Compile Include="ViewModel\Data\OkCancelApplyWindowCommand.cs" />
+    <Compile Include="ViewModel\Data\DirectoryViewData.cs" />
+    <Compile Include="View\ConfigurationWindow.xaml.cs">
+      <DependentUpon>ConfigurationWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\BasicFileViewModel.cs" />
+    <Compile Include="View\ProgramLauncherTaskTray.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ViewModel\BasicFileViewModel.cs" />
     <Compile Include="View\BasicFileWindow.xaml.cs">
       <DependentUpon>BasicFileWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\FileViewData.cs" />
+    <Compile Include="ViewModel\Data\FileViewData.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -100,23 +107,17 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="TestWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="View\BasicFileWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="View\ConfigurationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\OnlineCode\OnlineCode.csproj">
-      <Project>{d8a21fba-cc92-4c5d-ab25-674814e280fb}</Project>
-      <Name>OnlineCode</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="StringCompare\" />
+    <Folder Include="Factory\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
